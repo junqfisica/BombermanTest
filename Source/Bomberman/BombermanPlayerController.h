@@ -57,6 +57,14 @@ protected:
 	void MoveFoward2(float AxisValue);
 	void MoveRight2(float AxisValue);
 
+	/** Input handlers for press and relese Player1*/
+	void DropBombPressed();
+	void DropBombRelease();
+	
+	/** Input handlers for press and relese Player1*/
+	void DropBomb2Pressed();
+	void DropBomb2Release();
+
 
 	
 	// Structure that recives player's input

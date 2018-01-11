@@ -75,17 +75,18 @@ void ABombermanPlayerController::SetupInputComponent()
 	// set up gameplay key bindings
 	Super::SetupInputComponent();
 
-	//InputComponent->BindAction("SetDestination", IE_Pressed, this, &ABombermanPlayerController::OnSetDestinationPressed);
-	//InputComponent->BindAction("SetDestination", IE_Released, this, &ABombermanPlayerController::OnSetDestinationReleased);
+	// Bind Inputs for Player 1
+	InputComponent->BindAction("DropBomb", IE_Pressed, this, &ABombermanPlayerController::DropBombPressed);
+	InputComponent->BindAction("DropBomb", IE_Released, this, &ABombermanPlayerController::DropBombRelease);
 	InputComponent->BindAxis("MoveForward",this, &ABombermanPlayerController::MoveFoward);
 	InputComponent->BindAxis("MoveRight", this, &ABombermanPlayerController::MoveRight);
 
+
+	// Bind Inputs for Player 2
+	InputComponent->BindAction("DropBomb2", IE_Pressed, this, &ABombermanPlayerController::DropBomb2Pressed);
+	InputComponent->BindAction("DropBomb2", IE_Released, this, &ABombermanPlayerController::DropBomb2Release);
 	InputComponent->BindAxis("MoveForward2", this, &ABombermanPlayerController::MoveFoward2);
 	InputComponent->BindAxis("MoveRight2", this, &ABombermanPlayerController::MoveRight2);
-
-	// support touch devices 
-	//InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &ABombermanPlayerController::MoveToTouchLocation);
-	//InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ABombermanPlayerController::MoveToTouchLocation);
 
 }
 
@@ -109,4 +110,34 @@ void ABombermanPlayerController::MoveFoward2(float AxisValue)
 void ABombermanPlayerController::MoveRight2(float AxisValue)
 {
 	Player2Input.MoveY(AxisValue);
+}
+
+void ABombermanPlayerController::DropBombPressed()
+{
+	Player1Input.Fire(true); // Useful in the case when we want to make spwan by pressing and hold.
+
+	if (ABombermanCharacter* const Player1 = Cast<ABombermanCharacter>(GetCharacter()))
+	{
+		Player1->TryToSpwanBomb();
+	}
+}
+
+void ABombermanPlayerController::DropBombRelease()
+{
+	Player1Input.Fire(false);
+}
+
+void ABombermanPlayerController::DropBomb2Pressed()
+{
+	Player2Input.Fire(true);
+
+	if (Player2 != nullptr)
+	{
+		Player2->TryToSpwanBomb();
+	}
+}
+
+void ABombermanPlayerController::DropBomb2Release()
+{
+	Player2Input.Fire(false);
 }
