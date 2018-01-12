@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/DamageInterface.h"
+#include "PickUps.h"
 #include "BombermanCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -53,6 +54,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Bombs")
 	void TryToSpwanBomb();
 
+	/** Activate a power up
+	*@param Pickup/type -> The type of activation the pickup is given to player.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Pickup")
+	void ActivatePowerUp(EPickups Pickuptype);
+
+
 private:
 
 	// Curent number of bombs that player can use.
@@ -71,9 +79,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (ClampMin = "0.0", ClampMax = "2.0"))
 	float SpeedFactor;
 
+	// Modify the blast of boms by a factor x. (1 = no change, 2 = double size.) 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bombs", meta = (ClampMin = "1.0", ClampMax = "2.0"))
+	float BombBlastFactor;
+
 	// The maximum number of bombs the player can drop.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bombs", meta = (ClampMin = "1"))
 	int32 MaxAvaibleOfBombs;
+
+	// Event to spwan bomb.
+	UFUNCTION(BlueprintNativeEvent, Category = "Bombs")
+	void SpawnBomb();
+	virtual void SpawnBomb_Implementation();
 
 };
 

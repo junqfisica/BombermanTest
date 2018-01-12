@@ -16,8 +16,8 @@ ABomb::ABomb()
 	PrimaryActorTick.bCanEverTick = true;
 
 	TimeToExplode = 2.0f;
-	BlastDurantion = 5.0f;
-	ExplosionRange = 500.0f;
+	BlastDurantion = 2.0f;
+	ExplosionSize = 400.0f;
 	ExplosionCollisionProfile = "Bomb:Explosion"; // Not so safe, but it's ok for now.
 
 	CounterToDestroy = BlastDurantion;
@@ -42,16 +42,8 @@ void ABomb::BeginPlay()
 
 	GetWorldTimerManager().SetTimer(ExplodeTimeHandler, this, &ABomb::Explode, TimeToExplode);
 
-	{// Store the end locations for explosion
-		FVector Loc = GetActorLocation();
-		ExplosionEndLocations.Add(Loc + ExplosionRange*GetActorForwardVector());
-		ExplosionEndLocations.Add(Loc - ExplosionRange*GetActorForwardVector());
-		ExplosionEndLocations.Add(Loc + ExplosionRange*GetActorRightVector());
-		ExplosionEndLocations.Add(Loc - ExplosionRange*GetActorRightVector());
-
-	}
-
-
+	// Store the end locations for explosion
+	SetExplosionEndLocations(ExplosionSize);
 
 }
 
@@ -84,8 +76,12 @@ void ABomb::Explode()
 	//Turn Collision off when explode.
 	StaticMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
-	// Clear TimeHandler of explosion.
-	GetWorldTimerManager().ClearTimer(ExplodeTimeHandler);
+	// Clear ExplodeTimeHandler.
+	if(ExplodeTimeHandler.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(ExplodeTimeHandler);
+	}
+	
 
 	FVector Loc = GetActorLocation();
 
@@ -104,6 +100,21 @@ void ABomb::Explode()
 void ABomb::OnExplode_Implementation(const TArray<FHitResult>& HitResults)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Explode"));
+}
+
+void ABomb::IncreaseBombBlast(float Percent)
+{
+	ExplosionSize = ExplosionSize*Percent;
+	// Store the end locations for explosion
+	SetExplosionEndLocations(ExplosionSize);
+}
+
+void ABomb::TurnOffAutoExplosion()
+{
+	if (ExplodeTimeHandler.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(ExplodeTimeHandler);
+	}
 }
 
 void ABomb::ReciveDamage(int32 DamageTake)
@@ -133,25 +144,65 @@ void ABomb::ExplodeToDirection(const FVector & Start, const FVector & End)
 				HitLocation = OutResults.Last().Location;
 			}
 
+			// May have some Overlap
+			int32 RemoveLastIndex = OutResults.Num() - 1;
+			OutResults.RemoveAt(RemoveLastIndex); // Remove the collision hit. Note necessary.
+			CheckForOverlaps(OutResults);
 		}
 		else
-		{// Possibles overlaps.
-		 // May have some Overlap
-			for (FHitResult Overlap : OutResults)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Overlap"));
-				UKismetSystemLibrary::DrawDebugCircle(World, Overlap.Location, 50.0f, 12, FColor::Green, BlastDurantion, 5.0f); // Debug overlap
-				if (IDamageInterface* DamageActor = Cast<IDamageInterface>(Overlap.GetActor()))
-				{
-					DamageActor->ReciveDamage(0);
-				}
-			}
+		{// May have some Overlap
+
+			CheckForOverlaps(OutResults);
 		}
 
 		if (!bBombTriggered)
 		{
-			UKismetSystemLibrary::DrawDebugLine(World, Start, HitLocation, FColor::Red, BlastDurantion, 10.0f); // Debug Collision
+			UKismetSystemLibrary::DrawDebugLine(World, Start, HitLocation, FColor::Red, BlastDurantion, 10.0f); // Debug Blast
 		}
+
+	}
+}
+
+void ABomb::CheckForOverlaps(const TArray<FHitResult> & OverlapsResult)
+{
+	UWorld* World = GetWorld();
+	if(World != nullptr)
+	{
+		for (FHitResult Overlap : OverlapsResult)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Overlap"));
+			UKismetSystemLibrary::DrawDebugCircle(World, Overlap.Location, 50.0f, 12, FColor::Green, BlastDurantion, 5.0f); // Debug overlap
+			if (IDamageInterface* DamageActor = Cast<IDamageInterface>(Overlap.GetActor()))
+			{
+				DamageActor->ReciveDamage(0);
+			}
+		}
+	}
+
+}
+
+void ABomb::SetExplosionEndLocations(float Range)
+{
+	{// Store the end locations for explosion
+		FVector Loc = GetActorLocation();
+		if(ExplosionEndLocations.Num() == 0)
+		{
+			ExplosionEndLocations.Add(Loc + Range*GetActorForwardVector());
+			ExplosionEndLocations.Add(Loc - Range*GetActorForwardVector());
+			ExplosionEndLocations.Add(Loc + Range*GetActorRightVector());
+			ExplosionEndLocations.Add(Loc - Range*GetActorRightVector());
+		}
+		else
+		{
+			// Clear Array first.
+			ExplosionEndLocations.Empty();
+
+			ExplosionEndLocations.Add(Loc + Range*GetActorForwardVector());
+			ExplosionEndLocations.Add(Loc - Range*GetActorForwardVector());
+			ExplosionEndLocations.Add(Loc + Range*GetActorRightVector());
+			ExplosionEndLocations.Add(Loc - Range*GetActorRightVector());	
+		}
+		
 
 	}
 }

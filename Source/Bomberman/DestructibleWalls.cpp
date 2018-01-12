@@ -41,13 +41,23 @@ void ADestructibleWalls::Tick(float DeltaTime)
 
 void ADestructibleWalls::ReciveDamage(int32 DamageTake)
 {
-	bool bShouldDrop = FMath::RandRange(1, 100 / 30) == 1 ? true : false; // This has 30% change to happen
+	bool bShouldDrop = FMath::RandRange(1, 100 / 100) == 1 ? true : false; // This has 30% change to happen
 	if(bShouldDrop)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("DropIten"));
+		SpawnPickup();
+	}
+	else
+	{
+		Destroy(); // Only destroy direct if not drop an iten. Otherwise, the destroy will be done at SpawnPickup_Implementation
 	}
 
-	Destroy();
+}
+
+void ADestructibleWalls::SpawnPickup_Implementation()
+{
+	// Destroy this actor. Ps: Run this node in Blueprint for the last.
+	Destroy();	
 }
 
 

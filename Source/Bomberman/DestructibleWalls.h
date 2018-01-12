@@ -33,6 +33,13 @@ private:
 	// Static mesh for visual
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Destructible", meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* StaticMesh;
+
+protected:
+
+	//Event to Spawn pickup.Parent should be call at the end of this Event.
+	UFUNCTION(BlueprintNativeEvent, Category = "Pickup")
+	void SpawnPickup();
+	virtual void SpawnPickup_Implementation();
 	
 	
 };
