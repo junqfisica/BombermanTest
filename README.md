@@ -1,6 +1,3 @@
-# ArrowWay
-Unity project ArrowWay 
-
 # BombermanTest
 A retro 3D Top-Down game of bomberman. 
 **This project uses UE 4.18.**
@@ -94,9 +91,10 @@ Player 2:
   
   5. Include AI in the game.
   
- # Spended working hours.
+# Spended working hours.
  Around 14h.
- ## Authors
+
+# Authors
 * **Thiago C. Junqueira**
 
 
