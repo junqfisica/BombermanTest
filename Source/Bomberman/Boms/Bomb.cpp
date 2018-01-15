@@ -16,11 +16,9 @@ ABomb::ABomb()
 	PrimaryActorTick.bCanEverTick = true;
 
 	TimeToExplode = 2.0f;
-	BlastDurantion = 2.0f;
-	ExplosionSize = 400.0f;
+	BlastDurantion = 1.2f;
+	ExplosionSize = 150.0f;
 	ExplosionCollisionProfile = "Bomb:Explosion"; // Not so safe, but it's ok for now.
-
-	CounterToDestroy = BlastDurantion;
 
 	{// Set Components
 
@@ -45,6 +43,9 @@ void ABomb::BeginPlay()
 	// Store the end locations for explosion
 	SetExplosionEndLocations(ExplosionSize);
 
+	// Sets counter equal the durantion of blast.
+	CounterToDestroy = BlastDurantion;
+
 }
 
 // Called every frame
@@ -53,7 +54,8 @@ void ABomb::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (bBombTriggered == true)
-	{
+	{// When bomb is triggered check for overlaps until it's destroyed.
+
 		FVector Loc = GetActorLocation();
 
 		for (FVector EndLocation : ExplosionEndLocations)

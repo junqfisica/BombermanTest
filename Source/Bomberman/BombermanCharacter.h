@@ -40,6 +40,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
 	EPlayerStatus PlayerStatus;
 
+	// Reference to bomb. Set a remote bomb to this parameter when spawn it.
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Bombs")
+    class ABomb* ActiveRemoteBomb;
+
 	/** This function adds boms to player
 	*@param Value -> the number of bombs to add if possible
 	*/
@@ -66,6 +70,15 @@ private:
 	// Curent number of bombs that player can use.
 	int32 CurrentAvaibleBombs;
 
+	// This is passed to SpawnBomb event. If true spawn remote bomb.
+	bool bIsRemoteBomb = false;
+
+	// Timer handler for deactivate remote bomb.
+	FTimerHandle RemoteBombTimerHandler;
+
+	// Finishes the remote bomb power up.
+	void SetbRemoteBombToFalse();
+
 protected:
 
 	// Called when the game starts or when spawned
@@ -80,7 +93,7 @@ protected:
 	float SpeedFactor;
 
 	// Modify the blast of boms by a factor x. (1 = no change, 2 = double size.) 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bombs", meta = (ClampMin = "1.0", ClampMax = "2.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bombs", meta = (ClampMin = "1.0", ClampMax = "3.0"))
 	float BombBlastFactor;
 
 	// The maximum number of bombs the player can drop.
@@ -89,8 +102,8 @@ protected:
 
 	// Event to spwan bomb.
 	UFUNCTION(BlueprintNativeEvent, Category = "Bombs")
-	void SpawnBomb();
-	virtual void SpawnBomb_Implementation();
+	void SpawnBomb(bool bIsRemote);
+	virtual void SpawnBomb_Implementation(bool bIsRemote);
 
 };
 

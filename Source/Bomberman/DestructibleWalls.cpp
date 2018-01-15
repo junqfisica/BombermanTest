@@ -11,6 +11,8 @@ ADestructibleWalls::ADestructibleWalls()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	ChangeOfDropPowerUps = 30;
+
 	{// Set Components
 
 		if (!RootComponent)
@@ -41,7 +43,7 @@ void ADestructibleWalls::Tick(float DeltaTime)
 
 void ADestructibleWalls::ReciveDamage(int32 DamageTake)
 {
-	bool bShouldDrop = FMath::RandRange(1, 100 / 100) == 1 ? true : false; // This has 30% change to happen
+	bool bShouldDrop = FMath::RandRange(1, 100 / ChangeOfDropPowerUps) == 1 ? true : false; // This has ChangeOfDropPowerUps% change to happen
 	if(bShouldDrop)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("DropIten"));

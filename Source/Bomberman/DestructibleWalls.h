@@ -37,9 +37,13 @@ private:
 protected:
 
 	//Event to Spawn pickup.Parent should be call at the end of this Event.
-	UFUNCTION(BlueprintNativeEvent, Category = "Pickup")
+	UFUNCTION(BlueprintNativeEvent, Category = "Pickups")
 	void SpawnPickup();
 	virtual void SpawnPickup_Implementation();
-	
+
+	// Probability of droping a pickup. (From 1 to 100)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickups", meta =  (ClampMin = "1" , ClampMax = "100"))
+	int32 ChangeOfDropPowerUps;
+
 	
 };

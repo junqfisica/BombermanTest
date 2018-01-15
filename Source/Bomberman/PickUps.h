@@ -34,7 +34,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Type of this pick up.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PickUp")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PickUp", meta = (ExposeOnSpawn = true))
 	EPickups PickupType;
 
 

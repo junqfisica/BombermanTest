@@ -94,7 +94,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb")
 	FName ExplosionCollisionProfile;
 
-	// Time that the Bomb takes to go off secs.
+	// Time that the Bomb takes to go off in secs.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bomb", meta = (ClampMin = "0.0"))
 	float TimeToExplode;
 

@@ -5,6 +5,9 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "Boms/Bomb.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
 #include "Materials/Material.h"
 
 ABombermanCharacter::ABombermanCharacter()
@@ -38,6 +41,7 @@ ABombermanCharacter::ABombermanCharacter()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
+
 // Called when the game starts or when spawned
 void ABombermanCharacter::BeginPlay()
 {
@@ -53,7 +57,6 @@ void ABombermanCharacter::Tick(float DeltaSeconds)
 	// Change MAxWalkSpeed if SpeedFactorChange
 	GetCharacterMovement()->MaxWalkSpeed = BaseSpeed*SpeedFactor;
 
-
 }
 
 void ABombermanCharacter::ReciveDamage(int32 DamageTake)
@@ -65,6 +68,9 @@ void ABombermanCharacter::ReciveDamage(int32 DamageTake)
 	GetCapsuleComponent()->SetCollisionProfileName("IgnoreBomb:Only");
 
 	PlayerStatus = EPlayerStatus::Dead;
+
+	// Stops player movement.
+	BaseSpeed = 0.0f;
 
 }
 
@@ -81,12 +87,23 @@ int32 ABombermanCharacter::GetCurrentAvaibleBombs()
 
 void ABombermanCharacter::TryToSpwanBomb()
 {
-	if(CurrentAvaibleBombs > 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("DropBomb"));
-		CurrentAvaibleBombs = FMath::Clamp(CurrentAvaibleBombs - 1, 0, MaxAvaibleOfBombs);
-		SpawnBomb();
+	if(ActiveRemoteBomb == nullptr)
+	{// No remote bomb active.
+
+		if (CurrentAvaibleBombs > 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("DropBomb"));
+			CurrentAvaibleBombs = FMath::Clamp(CurrentAvaibleBombs - 1, 0, MaxAvaibleOfBombs);
+			SpawnBomb(bIsRemoteBomb);
+		}
 	}
+	else
+	{// Detonate remote bomb insted of Spawn, if active.
+
+		ActiveRemoteBomb->Explode();
+		
+	}
+	
 }
 
 
@@ -98,8 +115,8 @@ void ABombermanCharacter::ActivatePowerUp(EPickups Pickuptype)
 	case EPickups::LongerBlast:
 	{
 		UE_LOG(LogTemp, Warning, TEXT("LongerBlast Activation"));
-		// Increase blast size in 20% each time player gets this pickup. Max allow 2x.
-		BombBlastFactor = FMath::Clamp(BombBlastFactor + 0.2f, 1.0f, 2.0f);
+		// Increase blast size in 50% each time player gets this pickup. Max allow 3x.
+		BombBlastFactor = FMath::Clamp(BombBlastFactor + 0.5f, 1.0f, 3.0f);
 		break;
 	}
 
@@ -114,6 +131,15 @@ void ABombermanCharacter::ActivatePowerUp(EPickups Pickuptype)
 
 	case EPickups::Remotebomb:
 		UE_LOG(LogTemp, Warning, TEXT("Remotebomb Activation"));
+		bIsRemoteBomb = true;
+		
+		if (RemoteBombTimerHandler.IsValid())
+		{// Clear timer if active. This will make player have 10 more seconds of remote bomb.
+			GetWorldTimerManager().ClearTimer(RemoteBombTimerHandler);
+		}
+		
+		GetWorldTimerManager().SetTimer(RemoteBombTimerHandler, this, &ABombermanCharacter::SetbRemoteBombToFalse, 10.0f);
+
 		break;
 
 	case EPickups::RunFaster:
@@ -130,7 +156,12 @@ void ABombermanCharacter::ActivatePowerUp(EPickups Pickuptype)
 	}
 }
 
-void ABombermanCharacter::SpawnBomb_Implementation()
+void ABombermanCharacter::SetbRemoteBombToFalse()
+{
+	bIsRemoteBomb = false;
+}
+
+void ABombermanCharacter::SpawnBomb_Implementation(bool bIsRemote)
 {
 	//Add funtionality when spawn bomb, if necessary
 }
